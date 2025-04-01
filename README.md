@@ -19,6 +19,7 @@ This repository contains a Python script for processing PDF documents (specifica
 - Metadata extraction (CIK, CUSIP) from PDF content
 - Graph creation in Neo4j with proper relationships
 - Support for various retrieval methods (vector, keyword, graph, hybrid)
+- Loading of company financial data and asset manager holdings from CSV files
 
 ## Requirements
 
@@ -37,7 +38,7 @@ This repository contains a Python script for processing PDF documents (specifica
 
 2. Install required packages:
    ```
-   pip install neo4j>=5.14.0 neo4j-graphrag>=0.2.0 langchain>=0.1.0 python-dotenv>=1.0.0 requests>=2.31.0 openai>=1.12.0 tqdm>=4.66.0 pypdf pdfplumber
+   pip install neo4j>=5.14.0 neo4j-graphrag>=0.2.0 langchain>=0.1.0 python-dotenv>=1.0.0 requests>=2.31.0 openai>=1.12.0 tqdm>=4.66.0 pypdf pdfplumber pandas
    ```
 
 3. Create a `.env` file in the root directory with the following content:
@@ -50,6 +51,28 @@ This repository contains a Python script for processing PDF documents (specifica
    ```
 
 ## Usage
+
+### Command-Line Options
+
+```
+usage: graphrag_script.py [-h] [--pdf PDF] [--dir DIR] [--query QUERY]
+                          [--retriever {vector,keyword,graph,hybrid}] [--load]
+                          [--load-companies] [--load-holdings] [--use-lexical-graph]
+
+GraphRAG PDF Processing and Querying Tool
+
+options:
+  -h, --help            show this help message and exit
+  --pdf PDF             Path to a single PDF file to process
+  --dir DIR             Directory containing PDF files to process
+  --query QUERY         Query the knowledge graph
+  --retriever {vector,keyword,graph,hybrid}
+                        Retriever type to use for querying (default: hybrid)
+  --load                Load all PDFs from the default directory
+  --load-companies      Load company financials from CSV
+  --load-holdings       Load asset manager holdings from CSV
+  --use-lexical-graph   Use lexical graph builder instead of default
+```
 
 ### Process a Single PDF
 
@@ -69,6 +92,18 @@ python graphrag_script.py --load
 python graphrag_script.py --load --use-lexical-graph
 ```
 
+### Load Company Financial Data
+
+```
+python graphrag_script.py --load-companies
+```
+
+### Load Asset Manager Holdings Data
+
+```
+python graphrag_script.py --load-holdings
+```
+
 ### Query the Knowledge Graph
 
 ```
@@ -84,7 +119,8 @@ python graphrag_script.py --query "What was Apple's revenue in 2023?" --retrieve
 5. **Embedding Generation**: Text chunks are embedded using OpenAI embeddings.
 6. **Graph Creation**: The script creates Document, CIK, CUSIP, and Chunk nodes in Neo4j.
 7. **Relationship Establishment**: Relationships are created between nodes (e.g., Document-CIK, Document-CUSIP, Chunk-Document).
-8. **Querying**: The knowledge graph can be queried using various retrieval methods.
+8. **CSV Data Loading**: Company financial data and asset manager holdings can be loaded from CSV files.
+9. **Querying**: The knowledge graph can be queried using various retrieval methods.
 
 ## Neo4j Schema
 
@@ -92,6 +128,9 @@ python graphrag_script.py --query "What was Apple's revenue in 2023?" --retrieve
 - **CIK**: Nodes representing Central Index Key identifiers
 - **CUSIP**: Nodes representing Committee on Uniform Securities Identification Procedures identifiers
 - **Chunk**: Nodes containing text chunks with embeddings
+- **Company**: Nodes representing companies with financial data
+- **AssetManager**: Nodes representing asset management firms
+- **HOLDS**: Relationships between asset managers and companies they invest in
 
 ## Sample .env File
 
